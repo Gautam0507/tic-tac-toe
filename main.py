@@ -1,6 +1,7 @@
 import pygame
 import sys
 import time
+from pygame.locals import *
 
 # Global variables
 XO = 'x'
@@ -93,7 +94,87 @@ def check_win():
         winner = board[0][2]
         pygame.draw.line(screen, (250, 70, 70), (350, 50), (50, 350), 4)
 
-    if(all([all(row) for row in board]) and winner is None):
+    if (all([all(row) for row in board]) and winner is None):
         draw = True
     draw_status()
+
+
+def drawXO(row, col):
+    global board, XO
+
+    if row == 1:
+        posx = 30
+    if row == 2:
+        posx = window_width / 3 + 30
+    if row == 3:
+        posx = window_width / 3 * 2 + 30
+
+    if col == 1:
+        posy = 30
+
+    if col == 2:
+        posy = window_height / 3 + 30
+
+    if col == 3:
+        posy = window_height / 3 * 2 + 30
+
+    board[row - 1][col - 1] = XO
+
+    if (XO == "x"):
+        screen.blit(x_img, (posx, posy))
+        XO = 'o'
+    else:
+        screen.blit(o_img, (posy, posx))
+        XO = 'x'
+    pygame.display.update()
+
+
+def user_click(x,y):
+
+    if (x < window_width / 3):
+        col = 1
+    elif (x < window_width / 3 * 2):
+        col = 2
+    elif (x < window_width):
+        col = 3
+    else:
+        col = None
+
+    if (y < window_height / 3):
+        row = 1
+    elif (y < window_height / 3 * 2):
+        row = 2
+    elif (y < window_height):
+        row = 3
+    else:
+        row = None
+    if (row and col and board[row - 1][col - 1] is None):
+        global XO
+        drawXO(row,col)
+        check_win()
     
+def reset_game():
+    global board, winner, XO, draw
+    time.sleep(3)
+    XO = 'x'
+    draw = False
+    game_initiating_window()
+    winner = None
+    board = [[None]*3, [None]*3, [None]*3]
+
+game_initiating_window()
+
+while True:
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+
+        elif event.type is MOUSEBUTTONDOWN:
+            x, y = pygame.mouse.get_pos()
+            user_click(x,y)
+
+            if winner or draw:
+                reset_game()
+    pygame.display.update()
+    clock.tick(fps)
